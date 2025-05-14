@@ -11,7 +11,7 @@ public class DriverFactory {
 
     public static WebDriver initializerDriver() {
         ChromeOptions options = new ChromeOptions();
-        options.setBinary("/var/lib/jenkins/workspace/SC-AUTOMATION/chrome");
+       // options.setBinary("/var/lib/jenkins/workspace/SC-AUTOMATION/chrome");
         WebDriver driver = new ChromeDriver(options);
 
         Map<String, Object> prefs = new HashMap<>();
@@ -21,8 +21,8 @@ public class DriverFactory {
         options.setExperimentalOption("prefs", prefs);
         options.addArguments("--incognito");
         options.addArguments("--start-maximized");
-        options.addArguments("chrome.switches", "--disable-extensions");
-        options.addArguments("user-data-dir=/var/lib/jenkins/workspace/SC-AUTOMATION/chrome");
+        //options.addArguments("chrome.switches", "--disable-extensions");
+        //options.addArguments("user-data-dir=/var/lib/jenkins/workspace/SC-AUTOMATION/chrome");
 
         return new ChromeDriver(options);
     }
