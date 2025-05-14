@@ -11,6 +11,8 @@ public class DriverFactory {
 
     public static WebDriver initializerDriver() {
         ChromeOptions options = new ChromeOptions();
+        options.setBinary("/usr/.jenkins/workspace/SC-AUTOMATION/demo_automationUI/chrome.exe");
+        WebDriver driver = new ChromeDriver(options);
 
         Map<String, Object> prefs = new HashMap<>();
         prefs.put("credentials_enable_service", false);
