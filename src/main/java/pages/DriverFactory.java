@@ -21,6 +21,8 @@ public class DriverFactory {
         options.setExperimentalOption("prefs", prefs);
         options.addArguments("--incognito");
         options.addArguments("--start-maximized");
+        options.addArguments("chrome.switches", "--disable-extensions");
+        options.addArguments("user-data-dir=/var/lib/jenkins/workspace/SC-AUTOMATION/chrome");
 
         return new ChromeDriver(options);
     }
