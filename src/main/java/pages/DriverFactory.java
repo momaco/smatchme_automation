@@ -11,7 +11,7 @@ public class DriverFactory {
 
     public static WebDriver initializerDriver() {
         ChromeOptions options = new ChromeOptions();
-        options.setBinary("/usr/.jenkins/workspace/SC-AUTOMATION/demo_automationUI/chrome.exe");
+        options.setBinary("/var/lib/jenkins/workspace/SC-AUTOMATION/chrome");
         WebDriver driver = new ChromeDriver(options);
 
         Map<String, Object> prefs = new HashMap<>();
