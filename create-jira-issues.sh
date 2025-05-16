@@ -3,7 +3,7 @@
 JIRA_URL="https://strappcorp.atlassian.net"
 JIRA_EMAIL="ngonzalez@strappcorp.com"
 JIRA_TOKEN="$JIRA_TOKEN"
-PROJECT_KEY="QA"
+PROJECT_KEY="SMAT"
 ISSUE_TYPE="Bug"
 LABEL="auto-test-failed"
 
