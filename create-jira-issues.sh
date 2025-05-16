@@ -2,12 +2,15 @@
 
 JIRA_URL="https://strappcorp.atlassian.net"
 JIRA_EMAIL="ngonzalez@strappcorp.com"
-JIRA_TOKEN="$JIRA_TOKEN"
+JIRA_AUTH=$(echo -n "$JIRA_EMAIL:$JIRA_TOKEN" | base64)
 PROJECT_KEY="SMAT"
 ISSUE_TYPE="Bug"
 LABEL="auto-test-failed"
 
 echo "🔍 Analizando pruebas fallidas de Allure..."
+echo "🔗 BUILD_URL: $BUILD_URL"
+echo "📂 Archivos encontrados:"
+ls -l allure-results/*.json || echo "No se encontraron archivos .json"
 
 for file in allure-results/*.json; do
   if jq -e '.status == "failed"' "$file" > /dev/null; then
@@ -20,8 +23,8 @@ for file in allure-results/*.json; do
 
     echo "📌 Creando issue para test: $name"
 
-    curl -s -X POST \
-      -H "Authorization: Basic $(echo -n "$JIRA_EMAIL:$JIRA_TOKEN" | base64)" \
+    response=$(curl -s -w "%{http_code}" -o response.json -X POST \
+      -H "Authorization: Basic $JIRA_AUTH" \
       -H "Content-Type: application/json" \
       --data "{
         \"fields\": {
@@ -32,8 +35,9 @@ for file in allure-results/*.json; do
           \"labels\": [\"$LABEL\"]
         }
       }" \
-      "$JIRA_URL/rest/api/3/issue" > /dev/null
+      "$JIRA_URL/rest/api/3/issue")
 
-    echo "✅ Ticket creado: $summary"
+    echo "🔎 HTTP Status: $response"
+    cat response.json
   fi
 done
