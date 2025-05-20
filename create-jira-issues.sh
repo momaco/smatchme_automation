@@ -2,7 +2,7 @@
 
 JIRA_URL="https://strappcorp.atlassian.net"
 JIRA_EMAIL="ngonzalez@strappcorp.com"
-JIRA_AUTH=$(echo -n "$JIRA_EMAIL:$JIRA_TOKEN" | base64)
+JIRA_AUTH=$(printf "%s" "$JIRA_EMAIL:$JIRA_TOKEN" | base64 -w 0)
 PROJECT_KEY="SMAT"
 ISSUE_TYPE="Bug"
 LABEL="auto-test-failed"
@@ -21,35 +21,47 @@ for file in allure-results/*result*.json; do
 
     name=$(jq -r '.name' "$file")
     message=$(jq -r '.statusDetails.message // "Sin mensaje de error."' "$file")
-    echo "Mensaje : $message"   
+    echo "Mensaje : $message"  
+if [[ "$name" =~ ^(setUp|tearDown)$ ]]; then
+      echo "⚠️ Ignorando fixture: $name"
+      continue
+    fi 
 
     summary="❌ Test fallido: $name"
     description="Se detectó una falla automática:\n\n🧪 Test: $name\n💬 Detalles: $message\n🔗 Build: $BUILD_URL"
     echo "Descripcion : $description"
 
-    response=$(curl -s -w "%{http_code}" -o response.json -X POST \
+    json_payload=$(cat <<EOF
+{
+  "fields": {
+    "project": { "key": "$PROJECT_KEY" },
+    "summary": "$summary",
+    "issuetype": { "name": "$ISSUE_TYPE" },
+    "reporter": { "id": "$QA_ACCOUNT_ID" },
+    "labels": ["$LABEL"],
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [{
+        "type": "paragraph",
+        "content": [{
+          "type": "text",
+          "text": "$description"
+        }]
+      }]
+    }
+  }
+}
+EOF
+)
+
+    # Llamada a la API de Jira
+    response=$(curl --http1.1 -s -w "%{http_code}" -o response.json -X POST \
       -H "Authorization: Basic $JIRA_AUTH" \
       -H "Content-Type: application/json" \
-      -H "Accept: application/json" \
-      -H "Cookie: atlassian.xsrf.token=2d4c372aaef9037e48d7408f0d06bb0c4e7de2ba_lin" \
       "$JIRA_URL/rest/api/3/issue" \
-      --data '{
-        "fields": {
-      "project": { "key": "'"$PROJECT_KEY"'" },
-      "summary": "'"$summary"'",
-      "issuetype": { "name": "'"$ISSUE_TYPE"'" },
-      "reporter": { "id": "'"712020:c070dc6e-c712-473e-8870-93aac1c5fd46"'"},
-      "labels": ["'"$LABEL"'"],
-      "description": {
-        "content": [{
-          "content": [{"text": "'"$description"'", "type": "text"}],
-          "type": "paragraph"
-        }],
-        "type": "doc",
-        "version": 1
-      }
-    }
-  }')
+      --data "$json_payload")
+
 
     if [ "$response" = "201" ]; then
       ticket_key=$(jq -r '.key' response.json)
