@@ -10,6 +10,7 @@ QA_ACCOUNT_ID="712020:c070dc6e-c712-473e-8870-93aac1c5fd46"
 
 echo "🔍 Analizando pruebas fallidas de Allure..."
 echo "🔗 BUILD_URL: $BUILD_URL"
+echo$JIRA_TOKEN
 created_count=0
 
 for file in allure-results/*result*.json; do
