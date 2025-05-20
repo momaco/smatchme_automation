@@ -24,7 +24,7 @@ for file in allure-results/*result*.json; do
 
     summary="❌ Test fallido: $name"
     description="Se detectó una falla automática:\n\n🧪 Test: $name\n💬 Detalles: $message\n🔗 Build: $BUILD_URL"
-
+    echo "Descripcion : $description"
 
     response=$(curl -s -w "%{http_code}" -o response.json -X POST \
       -H "Authorization: Basic $JIRA_AUTH" \
@@ -33,9 +33,17 @@ for file in allure-results/*result*.json; do
         \"fields\": {
           \"project\": { \"key\": \"$PROJECT_KEY\" },
           \"summary\": \"$summary\",
-          \"issuetype\": { \"name\": \"$ISSUE_TYPE\" },
+          \"issuetype\": {\"name\": \"Bug\", \"id\": \"10006\" },
           \"labels\": [\"$LABEL\"],
           \"reporter\": { \"id\": \"$QA_ACCOUNT_ID\" },
+          \"description\": {
+            \"content\": [{
+              \"content\": [{\"text\": \"$description\", \"type\": \"text\"}],
+              \"type\": \"paragraph\"
+            }],
+            \"type\": \"doc\",
+            \"version\": 1
+          }
         }
       }" "$JIRA_URL/rest/api/3/issue")
 
