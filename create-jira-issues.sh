@@ -12,6 +12,13 @@ echo "🔍 Analizando pruebas fallidas de Allure..."
 echo "🔗 BUILD_URL: $BUILD_URL"
 created_count=0
 
+for file in allure-results/*.json; do
+  if grep -q '"status": "failed"' "$file"; then
+    test_name=$(grep '"name":' "$file" | head -1 | sed 's/.*"name": "\(.*\)",*/\1/')
+    message=$(grep '"statusDetails":' -A 5 "$file" | grep '"message":' | sed 's/.*"message": "\(.*\)",*/\1/' || echo "Sin mensaje")
+
+  summary = "❌ Test fallido: $test_name"
+  description = "Se detectó una falla automática:\n\n🧪 Test: $test_name\n💬 Detalles: $message\n🔗 Build: $BUILD_URL"
 
     response=$(curl -s -w "%{http_code}" -o response.json -X POST \
       -H "Authorization: Basic $JIRA_AUTH" \
@@ -20,11 +27,11 @@ created_count=0
         \"fields\": {
           \"project\": { \"key\": \"$PROJECT_KEY\" },
           \"summary\": \"$summary\",
-          \"description\": \"$description\",
-          \"issuetype\": { \"name\": \"$ISSUE_TYPE\" },
+          \"issuetype\": { \"name\": \"$ISSUE_TYPE\", \"id\": \"10006\"},
           \"labels\": [\"$LABEL\"],
-          \"assignee\": { \"accountId\": \"$QA_ACCOUNT_ID\" }
-        }
+          \"reporter\": { \"id\": \"$QA_ACCOUNT_ID\" },
+          \"description\": {\"content\": [{\"content\": [{\"text\": \"$description\",\"type\": \"text\"}],\"type\": \"paragraph\"}]}
+          }
       }" \
       "$JIRA_URL/rest/api/3/issue")
 
