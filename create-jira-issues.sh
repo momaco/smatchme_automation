@@ -36,7 +36,7 @@ for file in allure-results/*result*.json; do
           \"summary\": \"$summary\",
           \"issuetype\": {\"name\": \"Bug\", \"id\": \"10006\" },
           \"labels\": [\"$LABEL\"],
-          \"reporter\": { \"id\": \"$QA_ACCOUNT_ID\" },
+          \"reporter\": { \"id\": \"712020:c070dc6e-c712-473e-8870-93aac1c5fd46\" },
           \"description\": {
             \"content\": [{
               \"content\": [{\"text\": \"$description\", \"type\": \"text\"}],
