@@ -12,15 +12,17 @@ echo "🔍 Analizando pruebas fallidas de Allure..."
 echo "🔗 BUILD_URL: $BUILD_URL"
 created_count=0
 
-for file in allure-results/*.json; do
+for file in allure-results/*result*.json; do
   status=$(jq -r '.status // empty' "$file")
+  echo "📄 Revisando archivo: $file (status: $status)"
 
-  if [ "$status" = "failed" ]; then
+ if [ "$status" = "failed" ] || [ "$status" = "broken" ]; then
+
     name=$(jq -r '.name' "$file")
     message=$(jq -r '.statusDetails.message // "Sin mensaje de error."' "$file")
 
-  summary = "❌ Test fallido: $name"
-  description = "Se detectó una falla automática:\n\n🧪 Test: $name\n💬 Detalles: $message\n🔗 Build: $BUILD_URL"
+    summary="❌ Test fallido: $name"
+    description="Se detectó una falla automática:\n\n🧪 Test: $name\n💬 Detalles: $message\n🔗 Build: $BUILD_URL"
 
     response=$(curl -s -w "%{http_code}" -o response.json -X POST \
       -H "Authorization: Basic $JIRA_AUTH" \
@@ -29,18 +31,30 @@ for file in allure-results/*.json; do
         \"fields\": {
           \"project\": { \"key\": \"$PROJECT_KEY\" },
           \"summary\": \"$summary\",
-          \"issuetype\": { \"name\": \"$ISSUE_TYPE\", \"id\": \"10006\"},
+          \"issuetype\": { \"name\": \"$ISSUE_TYPE\" },
           \"labels\": [\"$LABEL\"],
           \"reporter\": { \"id\": \"$QA_ACCOUNT_ID\" },
-          \"description\": {\"content\": [{\"content\": [{\"text\": \"$description\",\"type\": \"text\"}],\"type\": \"paragraph\"}]}
+          \"description\": {
+            \"content\": [{
+              \"content\": [{\"text\": \"$description\", \"type\": \"text\"}],
+              \"type\": \"paragraph\"
+            }],
+            \"type\": \"doc\",
+            \"version\": 1
           }
-      }" \
-      "$JIRA_URL/rest/api/3/issue")
+        }
+      }" "$JIRA_URL/rest/api/3/issue")
 
-    echo "🔎 HTTP Status: $response"
-    cat response.json
-     echo "✅ Ticket creado: $summary"
-    created_count=$((created_count + 1))
+    if [ "$response" = "201" ]; then
+      ticket_key=$(jq -r '.key' response.json)
+      echo "✅ Ticket creado: $ticket_key"
+      created_count=$((created_count + 1))
+    else
+      echo "❌ Error al crear ticket para: $name (HTTP $response)"
+      cat response.json
+    fi
   fi
 done
+
 echo "📈 Total de tickets creados: $created_count"
+
