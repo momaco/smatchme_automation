@@ -13,12 +13,14 @@ echo "🔗 BUILD_URL: $BUILD_URL"
 created_count=0
 
 for file in allure-results/*.json; do
-  if grep -q '"status": "failed"' "$file"; then
-    test_name=$(grep '"name":' "$file" | head -1 | sed 's/.*"name": "\(.*\)",*/\1/')
-    message=$(grep '"statusDetails":' -A 5 "$file" | grep '"message":' | sed 's/.*"message": "\(.*\)",*/\1/' || echo "Sin mensaje")
+  status=$(jq -r '.status // empty' "$file")
 
-  summary = "❌ Test fallido: $test_name"
-  description = "Se detectó una falla automática:\n\n🧪 Test: $test_name\n💬 Detalles: $message\n🔗 Build: $BUILD_URL"
+  if [ "$status" = "failed" ]; then
+    name=$(jq -r '.name' "$file")
+    message=$(jq -r '.statusDetails.message // "Sin mensaje de error."' "$file")
+
+  summary = "❌ Test fallido: $name"
+  description = "Se detectó una falla automática:\n\n🧪 Test: $name\n💬 Detalles: $message\n🔗 Build: $BUILD_URL"
 
     response=$(curl -s -w "%{http_code}" -o response.json -X POST \
       -H "Authorization: Basic $JIRA_AUTH" \
