@@ -28,7 +28,6 @@ for file in allure-results/*result*.json; do
     echo "Descripcion : $description"
 
     response=$(curl -s -w "%{http_code}" -o response.json -X POST \
-      --location 'https://strappcorp.atlassian.net/rest/api/3/issue' \
       -H "Authorization: Basic $JIRA_AUTH" \
       -H "Content-Type: application/json" \
       -H "Accept: application/json" \
