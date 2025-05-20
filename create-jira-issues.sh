@@ -64,6 +64,7 @@ for file in allure-results/*result*.json; do
     }
         }
 }'
+ "$JIRA_URL/rest/api/3/issue")
 
     if [ "$response" = "201" ]; then
       ticket_key=$(jq -r '.key' response.json)
