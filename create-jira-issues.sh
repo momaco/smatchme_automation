@@ -31,7 +31,7 @@ for file in allure-results/*result*.json; do
       -H "Authorization: Basic $JIRA_AUTH" \
       -H "Content-Type: application/json" \
       -H "Accept: application/json" \
-      -H "Cookie:"atlassian.xsrf.token=2d4c372aaef9037e48d7408f0d06bb0c4e7de2ba_lin" \
+      -H "Cookie: atlassian.xsrf.token=2d4c372aaef9037e48d7408f0d06bb0c4e7de2ba_lin" \
      --data "{
         \"fields\": {
           \"project\": { \"key\": \"$PROJECT_KEY\"},
