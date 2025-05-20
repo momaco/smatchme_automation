@@ -20,9 +20,11 @@ for file in allure-results/*result*.json; do
 
     name=$(jq -r '.name' "$file")
     message=$(jq -r '.statusDetails.message // "Sin mensaje de error."' "$file")
+    echo "Mensaje : $message"   
 
     summary="❌ Test fallido: $name"
     description="Se detectó una falla automática:\n\n🧪 Test: $name\n💬 Detalles: $message\n🔗 Build: $BUILD_URL"
+
 
     response=$(curl -s -w "%{http_code}" -o response.json -X POST \
       -H "Authorization: Basic $JIRA_AUTH" \
@@ -34,14 +36,6 @@ for file in allure-results/*result*.json; do
           \"issuetype\": { \"name\": \"$ISSUE_TYPE\" },
           \"labels\": [\"$LABEL\"],
           \"reporter\": { \"id\": \"$QA_ACCOUNT_ID\" },
-          \"description\": {
-            \"content\": [{
-              \"content\": [{\"text\": \"$description\", \"type\": \"text\"}],
-              \"type\": \"paragraph\"
-            }],
-            \"type\": \"doc\",
-            \"version\": 1
-          }
         }
       }" "$JIRA_URL/rest/api/3/issue")
 
