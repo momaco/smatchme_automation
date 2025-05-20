@@ -28,25 +28,42 @@ for file in allure-results/*result*.json; do
     echo "Descripcion : $description"
 
     response=$(curl -s -w "%{http_code}" -o response.json -X POST \
+      --location 'https://strappcorp.atlassian.net/rest/api/3/issue' \
       -H "Authorization: Basic $JIRA_AUTH" \
       -H "Content-Type: application/json" \
-      --data "{
-        \"fields\": {
-          \"project\": { \"key\": \"$PROJECT_KEY\" },
-          \"summary\": \"$summary\",
-          \"issuetype\": {\"name\": \"Bug\", \"id\": \"10006\" },
-          \"labels\": [\"$LABEL\"],
-          \"reporter\": { \"id\": \"712020:c070dc6e-c712-473e-8870-93aac1c5fd46\" },
-          \"description\": {
-            \"content\": [{
-              \"content\": [{\"text\": \"$description\", \"type\": \"text\"}],
-              \"type\": \"paragraph\"
-            }],
-            \"type\": \"doc\",
-            \"version\": 1
-          }
+      -H "Accept: application/json" \
+      -H "Cookie:"atlassian.xsrf.token=2d4c372aaef9037e48d7408f0d06bb0c4e7de2ba_lin" \
+     --data '{
+        "fields": {
+          "project": { 
+            "key": "$PROJECT_KEY" 
+            },
+          "summary": "$summary",
+          "reporter": {
+            "id": "712020:c070dc6e-c712-473e-8870-93aac1c5fd46"
+            },
+          "issuetype": {
+            "name": "Bug",
+            "id": "10006"
+             },
+          "labels": ["auto-test-failed"],
+          "description": {
+      "content": [
+        {
+          "content": [
+            {
+              "text": "$description",
+              "type": "text"
+            }
+          ],
+          "type": "paragraph"
         }
-      }" "$JIRA_URL/rest/api/3/issue")
+      ],
+      "type": "doc",
+      "version": 1
+    }
+        }
+}'
 
     if [ "$response" = "201" ]; then
       ticket_key=$(jq -r '.key' response.json)
