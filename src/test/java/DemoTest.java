@@ -1,9 +1,12 @@
 import io.github.bonigarcia.wdm.WebDriverManager;
 import io.qameta.allure.*;
+import listener.JiraIssueListener;
+import listener.PostJiraFailures;
 import org.openqa.selenium.WebDriver;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import pages.*;
 import pages.catalogs.DashboardPage;
@@ -14,6 +17,7 @@ import utils.WaitUtils;
 
 
 @Epic("Demo Automation")
+@Listeners(JiraIssueListener.class)
 public class DemoTest {
 
     private WebDriver driver;
