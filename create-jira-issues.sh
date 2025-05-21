@@ -13,6 +13,14 @@ echo "🔗 BUILD_URL: $BUILD_URL"
 echo "$JIRA_TOKEN"
 created_count=0
 
+# 🧪 Verificación de autenticación
+echo "🔎 Verificando credenciales contra Jira..."
+jira_myself_response=$(curl -s -u "$JIRA_EMAIL:$JIRA_TOKEN" \
+  -X GET "$JIRA_URL/rest/api/3/myself")
+
+echo "🔄 Respuesta de /myself:"
+echo "$jira_myself_response" | jq || echo "$jira_myself_response"
+
 for file in allure-results/*result*.json; do
   status=$(jq -r '.status // empty' "$file")
   echo "📄 Revisando archivo: $file (status: $status)"
@@ -54,6 +62,7 @@ if [[ "$name" =~ ^(setUp|tearDown)$ ]]; then
 }
 EOF
 )
+
 
     # Llamada a la API de Jira
     response=$(curl --http1.1 -s -w "%{http_code}" -o response.json -X POST \
